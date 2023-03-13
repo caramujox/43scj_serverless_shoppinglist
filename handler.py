@@ -17,7 +17,7 @@ def handler(event, context):
         msgs = sqs.getMessage(10)
         for record in event['Records']:
             payload = record['body']
-            print("msgs:::::" + msgs['Messages'])
+            #print("msgs:::::" + msgs['Messages'])
             print("PRINTANDO PAYLOAD: " + json.dumps(payload))
             table.put_item(Item= {'item_id': str(uuid.uuid4()),'datetime': str(datetime.now()),  'name': record['body']})
             #print("Item " + record["body"] + " incluido com sucesso!")
