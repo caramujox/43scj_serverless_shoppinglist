@@ -8,10 +8,11 @@ from sqsHandler import SqsHandler
 def handler(event, context):
 
   #Setup de variaveis para acesso
-    sqs = SqsHandler('https://sqs.us-east-1.amazonaws.com/703846776328/trab-final-serverless')
+    sqs = SqsHandler('https://sqs.us-east-1.amazonaws.com/019395563129/trab-final-serverless')
     dynamo = boto3.resource('dynamodb')
     table = dynamo.Table('shopping-list')
     
+    table.put_item(Item= {'item_id': 'banana'})
     print(json.dumps(event))
     
     #Verifica as mensagens na fila, e insere na tabela
