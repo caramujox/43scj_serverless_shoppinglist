@@ -6,27 +6,19 @@ from sqsHandler import SqsHandler
 #dao = BaseDAO('shopping-list')
 
 def handler(event, context):
-
-  #Setup de variaveis para acesso
+    #env = Variables()
     sqs = SqsHandler('https://sqs.us-east-1.amazonaws.com/019395563129/trab-final-serverless')
     dynamo = boto3.resource('dynamodb')
     table = dynamo.Table('shopping-list')
     
-    table.put_item(Item= {'item_id': 'banana'})
     print(json.dumps(event))
     
-    #Verifica as mensagens na fila, e insere na tabela
-    for i in range(100):
+    for record in event['Records']:
         msgs = sqs.getMessage(10)
-        print(json.dumps(msgs))
+        print("msgs:::::" + json.dumps(msgs))
+        print("PRINTANDO STATUS: " + json.dumps(msgs))
         
-        if('Messages' not in msgs):
-            break
-        if(len(msgs['Messages'])== 0):
-            break
-        
-        for message in msgs['Messages']:
-            json.dumps(message['Body'])
-            table.put_item(Item= {'item_id': str(uuid.uuid4()), 'name': message['Body']})
+        print("Item " + record["body"] + " incluido com sucesso!")
+        table.put_item(Item= {'item_id': str(uuid.uuid4()), 'name': record['body']})
             #dao.put_item({'item_id': str(uuid.uuid4()), 'name': message['Body']})
         
