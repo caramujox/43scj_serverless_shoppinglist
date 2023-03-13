@@ -13,12 +13,11 @@ def handler(event, context):
     
     print(json.dumps(event))
     
-    for record in event['Records']:
+    for i in range(100):
         msgs = sqs.getMessage(10)
-        print("msgs:::::" + json.dumps(msgs))
-        print("PRINTANDO STATUS: " + json.dumps(msgs))
-        
-        print("Item " + record["body"] + " incluido com sucesso!")
-        table.put_item(Item= {'item_id': str(uuid.uuid4()), 'name': record['body']})
-            #dao.put_item({'item_id': str(uuid.uuid4()), 'name': message['Body']})
-        
+        for record in event['Records']:
+            payload = record['body']
+            print("msgs:::::" + msgs['Messages'])
+            print("PRINTANDO PAYLOAD: " + json.dumps(payload))
+            table.put_item(Item= {'item_id': str(uuid.uuid4()),'datetime': str(datetime.now()),  'name': record['body']})
+            #print("Item " + record["body"] + " incluido com sucesso!")
