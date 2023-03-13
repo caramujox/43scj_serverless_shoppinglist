@@ -6,7 +6,7 @@ from sqsHandler import SqsHandler
 #dao = BaseDAO('shopping-list')
 
 def handler(event, context):
-    #env = Variables()
+    #TROCAR URL PELA URL DE DENTRO DA CONTA QUE VAI EXECUTAR A LAMBDA
     sqs = SqsHandler('https://sqs.us-east-1.amazonaws.com/019395563129/trab-final-serverless')
     dynamo = boto3.resource('dynamodb')
     table = dynamo.Table('shopping-list')
