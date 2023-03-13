@@ -1,0 +1,171 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "The AWS CloudFormation template for this Serverless application",
+  "Resources": {
+    "ServerlessDeploymentBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "ServerlessDeploymentBucketPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "ServerlessDeploymentBucket"
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:*",
+              "Effect": "Deny",
+              "Principal": "*",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "ServerlessDeploymentBucket"
+                      },
+                      "/*"
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "ServerlessDeploymentBucket"
+                      }
+                    ]
+                  ]
+                }
+              ],
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": false
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "SqsHandlerLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/avaliacao-serverless-dev-sqsHandler"
+      }
+    },
+    "SqsHandlerLambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ServerlessDeploymentBucket"
+          },
+          "S3Key": "serverless/avaliacao-serverless/dev/1678680531621-2023-03-13T04:08:51.621Z/avaliacao-serverless.zip"
+        },
+        "Handler": "handler.handler",
+        "Runtime": "python3.8",
+        "FunctionName": "avaliacao-serverless-dev-sqsHandler",
+        "MemorySize": 128,
+        "Timeout": 6,
+        "Environment": {
+          "Variables": {
+            "sqs_url": {
+              "Fn::Sub": "https://sqs.us-east-1.amazonaws.com/019395563129/trab-final-serverless"
+            }
+          }
+        },
+        "Role": {
+          "Fn::Sub": "arn:aws:iam::019395563129:role/trab-severless-role"
+        }
+      },
+      "DependsOn": [
+        "SqsHandlerLogGroup"
+      ]
+    },
+    "SqsHandlerLambdaVersionfk6TUHXpcz9xsIAYYdddTZMMJHyLMqVa3uaNhgoRm4": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "SqsHandlerLambdaFunction"
+        },
+        "CodeSha256": "pc3CNUtwN5xO7Eli9a38DV3LncnAKjW1EPB4BT7ZOM4="
+      }
+    },
+    "SqsHandlerEventSourceMappingDynamodbShoppinglist": {
+      "Type": "AWS::Lambda::EventSourceMapping",
+      "DependsOn": [],
+      "Properties": {
+        "BatchSize": 1,
+        "Enabled": true,
+        "EventSourceArn": "arn:aws:dynamodb:us-east-1:019395563129:table/shopping-list/stream/2023-03-13T03:20:58.894",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "SqsHandlerLambdaFunction",
+            "Arn"
+          ]
+        },
+        "StartingPosition": "TRIM_HORIZON",
+        "MaximumRetryAttempts": 10
+      }
+    },
+    "SqsHandlerEventSourceMappingSQSTrabfinalserverless": {
+      "Type": "AWS::Lambda::EventSourceMapping",
+      "DependsOn": [],
+      "Properties": {
+        "BatchSize": 10,
+        "EventSourceArn": "arn:aws:sqs:us-east-1:019395563129:trab-final-serverless",
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "SqsHandlerLambdaFunction",
+            "Arn"
+          ]
+        },
+        "Enabled": true
+      }
+    }
+  },
+  "Outputs": {
+    "ServerlessDeploymentBucketName": {
+      "Value": {
+        "Ref": "ServerlessDeploymentBucket"
+      },
+      "Export": {
+        "Name": "sls-avaliacao-serverless-dev-ServerlessDeploymentBucketName"
+      }
+    },
+    "SqsHandlerLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "SqsHandlerLambdaVersionfk6TUHXpcz9xsIAYYdddTZMMJHyLMqVa3uaNhgoRm4"
+      },
+      "Export": {
+        "Name": "sls-avaliacao-serverless-dev-SqsHandlerLambdaFunctionQualifiedArn"
+      }
+    }
+  }
+}
